@@ -1,0 +1,17 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    password VARCHAR(255) NOT NULL,
+    role_id UUID REFERENCES roles(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users (deleted_at);
+
+-- +goose Down
+DROP TABLE IF EXISTS users;

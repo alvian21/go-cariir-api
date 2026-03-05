@@ -1,0 +1,26 @@
+# Binary files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+tmp/
+
+# External dependencies
+vendor/
+
+# Environment variables
+.env
+
+# Go workspace file
+go.work
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+tmp/
