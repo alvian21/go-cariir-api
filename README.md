@@ -5,7 +5,8 @@ A robust and scalable Restful API built with Golang using the Fiber framework, G
 ## 🚀 Features
 
 - **Authentication**: Secure JWT-based authentication.
-- **RBAC**: Role-Based Access Control (Admin, User, etc.).
+- **RBAC**: Role-Based Access Control with support for granular permissions.
+- **Permission Guard**: Middleware for protecting routes based on specific permissions.
 - **Database Migrations**: Managed with Goose.
 - **Seeding**: Automated database seeding for initial data.
 - **Standardized Responses**: Consistent JSON structure for all API responses.
@@ -82,6 +83,22 @@ A robust and scalable Restful API built with Golang using the Fiber framework, G
    # Standard Go run
    go run main.go
    ```
+
+## 🛡 RBAC & Middleware
+
+This project implements a granular Role-Based Access Control (RBAC) system.
+
+### Auth Middleware
+
+Protects routes and ensures the user is authenticated. It stores user claims in `context.Locals("user")`.
+
+### Permission Guard
+
+Protects routes based on specific permissions.
+
+```go
+user.Post("/", middleware.PermissionGuard("user.create"), handler.UserHandlerCreate)
+```
 
 ## 🛣 API Endpoints
 
