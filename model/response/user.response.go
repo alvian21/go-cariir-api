@@ -8,10 +8,10 @@ import (
 
 type UserResponse struct {
 	ID        uuid.UUID  `json:"id"`
-	FullName  string     `json:"full_name"`
+	FullName  string     `json:"fullName"`
 	Email     string     `json:"email"`
-	IsActive  bool       `json:"is_active"`
-	RoleID    *uuid.UUID `json:"role_id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	IsActive  bool       `json:"isActive"`
+	RoleID    *uuid.UUID `json:"roleId"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 }

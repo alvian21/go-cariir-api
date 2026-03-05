@@ -4,6 +4,7 @@ import (
 	"go-cariir-api/database"
 	"go-cariir-api/model/entity"
 	"go-cariir-api/model/request"
+	"go-cariir-api/model/response"
 	"go-cariir-api/utils"
 	"log"
 
@@ -21,9 +22,32 @@ func UserHandlerGetAll(ctx *fiber.Ctx) error {
 
 	if result.Error != nil {
 		log.Println(result.Error)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Failed to fetch users",
+			Code:    fiber.StatusInternalServerError,
+		})
 	}
 
-	return ctx.JSON(fiber.Map{"data": users})
+	var usersResponse []response.UserResponse
+	for _, u := range users {
+		usersResponse = append(usersResponse, response.UserResponse{
+			ID:        u.ID,
+			FullName:  u.FullName,
+			Email:     u.Email,
+			IsActive:  u.IsActive,
+			RoleID:    u.RoleID,
+			CreatedAt: u.CreatedAt,
+			UpdatedAt: u.UpdatedAt,
+		})
+	}
+
+	return ctx.JSON(response.GenericResponse{
+		Status:  "success",
+		Message: "Success fetch users",
+		Data:    usersResponse,
+		Code:    fiber.StatusOK,
+	})
 }
 
 func UserHandlerCreate(ctx *fiber.Ctx) error {
@@ -37,7 +61,12 @@ func UserHandlerCreate(ctx *fiber.Ctx) error {
 	validate := validator.New()
 	errValidate := validate.Struct(user)
 	if errValidate != nil {
-		return ctx.Status(400).JSON(fiber.Map{"message": "failed", "errors": errValidate.Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Validation failed",
+			Errors:  errValidate.Error(),
+			Code:    fiber.StatusBadRequest,
+		})
 	}
 
 	newUser := entity.User{
@@ -49,7 +78,11 @@ func UserHandlerCreate(ctx *fiber.Ctx) error {
 	hashedPassword, err := utils.HashingPassword(user.Password)
 	if err != nil {
 		log.Println(err)
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "internal server error", "errors": err.Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Failed to hash password",
+			Code:    fiber.StatusInternalServerError,
+		})
 	}
 
 	newUser.Password = hashedPassword
@@ -57,10 +90,29 @@ func UserHandlerCreate(ctx *fiber.Ctx) error {
 	errCreate := database.DB.Create(&newUser).Error
 
 	if errCreate != nil {
-		return ctx.Status(500).JSON(fiber.Map{"message": errCreate.Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Failed to create user",
+			Code:    fiber.StatusInternalServerError,
+		})
 	}
 
-	return ctx.JSON(fiber.Map{"data": newUser, "message": "user created"})
+	userResponse := response.UserResponse{
+		ID:        newUser.ID,
+		FullName:  newUser.FullName,
+		Email:     newUser.Email,
+		IsActive:  newUser.IsActive,
+		RoleID:    newUser.RoleID,
+		CreatedAt: newUser.CreatedAt,
+		UpdatedAt: newUser.UpdatedAt,
+	}
+
+	return ctx.JSON(response.GenericResponse{
+		Status:  "success",
+		Message: "User created successfully",
+		Data:    userResponse,
+		Code:    fiber.StatusOK,
+	})
 }
 
 func UserHandlerGetById(ctx *fiber.Ctx) error {
@@ -70,10 +122,29 @@ func UserHandlerGetById(ctx *fiber.Ctx) error {
 
 	result := database.DB.First(&user, "id = ? ", userId).Error
 	if result != nil {
-		return ctx.Status(404).JSON(fiber.Map{"message": "user not found"})
+		return ctx.Status(fiber.StatusNotFound).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "User not found",
+			Code:    fiber.StatusNotFound,
+		})
 	}
 
-	return ctx.JSON(fiber.Map{"data": user, "message": "success"})
+	userResponse := response.UserResponse{
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Email:     user.Email,
+		IsActive:  user.IsActive,
+		RoleID:    user.RoleID,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	return ctx.JSON(response.GenericResponse{
+		Status:  "success",
+		Message: "Success fetch user",
+		Data:    userResponse,
+		Code:    fiber.StatusOK,
+	})
 }
 
 func UserHandlerUpdate(ctx *fiber.Ctx) error {
@@ -86,7 +157,12 @@ func UserHandlerUpdate(ctx *fiber.Ctx) error {
 	validate := validator.New()
 	errValidate := validate.Struct(userRequest)
 	if errValidate != nil {
-		return ctx.Status(400).JSON(fiber.Map{"message": "failed", "errors": errValidate.Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Validation failed",
+			Errors:  errValidate.Error(),
+			Code:    fiber.StatusBadRequest,
+		})
 	}
 
 	userId := ctx.Params("id")
@@ -95,7 +171,11 @@ func UserHandlerUpdate(ctx *fiber.Ctx) error {
 
 	result := database.DB.First(&user, "id = ? ", userId).Error
 	if result != nil {
-		return ctx.Status(404).JSON(fiber.Map{"message": "user not found"})
+		return ctx.Status(fiber.StatusNotFound).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "User not found",
+			Code:    fiber.StatusNotFound,
+		})
 	}
 
 	user.FullName = userRequest.FullName
@@ -103,10 +183,29 @@ func UserHandlerUpdate(ctx *fiber.Ctx) error {
 
 	errUpdate := database.DB.Save(&user).Error
 	if errUpdate != nil {
-		return ctx.Status(500).JSON(fiber.Map{"message": errUpdate.Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Failed to update user",
+			Code:    fiber.StatusInternalServerError,
+		})
 	}
 
-	return ctx.JSON(fiber.Map{"data": user, "message": "success"})
+	userResponse := response.UserResponse{
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Email:     user.Email,
+		IsActive:  user.IsActive,
+		RoleID:    user.RoleID,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	return ctx.JSON(response.GenericResponse{
+		Status:  "success",
+		Message: "User updated successfully",
+		Data:    userResponse,
+		Code:    fiber.StatusOK,
+	})
 }
 
 func UserHandlerDelete(ctx *fiber.Ctx) error {
@@ -116,14 +215,26 @@ func UserHandlerDelete(ctx *fiber.Ctx) error {
 
 	result := database.DB.Debug().First(&user, "id = ? ", userId).Error
 	if result != nil {
-		return ctx.Status(404).JSON(fiber.Map{"message": "user not found"})
+		return ctx.Status(fiber.StatusNotFound).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "User not found",
+			Code:    fiber.StatusNotFound,
+		})
 	}
 
 	errDelete := database.DB.Debug().Delete(&user).Error
 
 	if errDelete != nil {
-		return ctx.Status(500).JSON(fiber.Map{"message": "internal server error"})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Failed to delete user",
+			Code:    fiber.StatusInternalServerError,
+		})
 	}
 
-	return ctx.JSON(fiber.Map{"message": "user deleted"})
+	return ctx.JSON(response.GenericResponse{
+		Status:  "success",
+		Message: "User deleted successfully",
+		Code:    fiber.StatusOK,
+	})
 }
