@@ -1,0 +1,22 @@
+services:
+  cariir-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cariir-api
+    restart: always
+    ports:
+      - "7310:7310"
+    tty: true
+    container_name: cariir-api
+    env_file:
+      - .env
+    networks:
+      - postgres_default
+      - shared_net
+
+networks:
+  postgres_default:
+    external: true
+  shared_net:
+    external: true
