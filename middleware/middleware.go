@@ -10,15 +10,25 @@ import (
 )
 
 func Auth(ctx *fiber.Ctx) error {
-	token := ctx.Get("x-token")
+	authorization := ctx.Get("Authorization")
 
-	if token == "" {
+	if authorization == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(response.GenericResponse{
 			Status:  "error",
 			Message: "Unauthenticated",
 			Code:    fiber.StatusUnauthorized,
 		})
 	}
+
+	if len(authorization) < 7 || authorization[:7] != "Bearer " {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "Invalid authorization header format",
+			Code:    fiber.StatusUnauthorized,
+		})
+	}
+
+	token := authorization[7:]
 
 	claims, err := utils.DecodeToken(token)
 	if err != nil {
