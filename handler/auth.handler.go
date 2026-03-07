@@ -183,3 +183,35 @@ func RegisterHandler(ctx *fiber.Ctx) error {
 		Code:    fiber.StatusOK,
 	})
 }
+
+func MeHandler(ctx *fiber.Ctx) error {
+	userClaims := ctx.Locals("user").(jwt.MapClaims)
+	userId := userClaims["userId"].(string)
+
+	var user entity.User
+	err := database.DB.Preload("Role").First(&user, "id = ?", userId).Error
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(response.GenericResponse{
+			Status:  "error",
+			Message: "User not found",
+			Code:    fiber.StatusNotFound,
+		})
+	}
+
+	userResponse := response.UserResponse{
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Email:     user.Email,
+		IsActive:  user.IsActive,
+		RoleID:    user.RoleID,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	return ctx.JSON(response.GenericResponse{
+		Status:  "success",
+		Message: "User profile fetched successfully",
+		Data:    userResponse,
+		Code:    fiber.StatusOK,
+	})
+}

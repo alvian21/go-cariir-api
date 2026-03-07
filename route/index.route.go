@@ -23,6 +23,7 @@ func RouteInit(r *fiber.App) {
 	auth := r.Group("/auth")
 	auth.Post("/login", handler.LoginHandler)
 	auth.Post("/register", handler.RegisterHandler)
+	auth.Get("/me", middleware.Auth, handler.MeHandler)
 
 	// User
 	user := r.Group("/user", middleware.Auth)
