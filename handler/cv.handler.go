@@ -39,6 +39,8 @@ func CreateCVHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
+	log.Println("body data:", string(ctx.Body()))
+
 	if err := ctx.BodyParser(&reqCVs); err != nil {
 		log.Println("body parser error:", err)
 		return ctx.Status(fiber.StatusBadRequest).JSON(response.GenericResponse{
