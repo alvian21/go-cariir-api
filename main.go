@@ -20,6 +20,11 @@ func main() {
 	// RUN SEED
 	seed.RunSeed()
 
+	// INITIAL DATABASE MONGO
+	database.DatabaseInitMongo()
+
+	defer database.DatabaseCloseMongo()
+
 	app := fiber.New(fiber.Config{
 		ReadBufferSize: 16384,
 	})
