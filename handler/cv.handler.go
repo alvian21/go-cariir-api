@@ -8,6 +8,7 @@ import (
 	"go-cariir-api/model/response"
 	"log"
 	"os"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -18,6 +19,7 @@ func InsertManyCV(data []request.JobSearchRequest) error {
 
 	var docs []interface{}
 	for _, item := range data {
+		item.CreatedAt = time.Now()
 		docs = append(docs, item)
 	}
 

@@ -1,6 +1,10 @@
 package request
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type JobSearchRequest struct {
 	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id"`
@@ -13,6 +17,8 @@ type JobSearchRequest struct {
 	SearchKeyword     string             `bson:"searchKeyword" json:"searchKeyword"`
 	SearchLocation    string             `bson:"searchLocation" json:"searchLocation"`
 	ListingUrl        string             `bson:"listingUrl" json:"listingUrl"`
+
+	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }
 
 type CVData struct {
