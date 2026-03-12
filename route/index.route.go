@@ -26,8 +26,9 @@ func RouteInit(r *fiber.App) {
 	auth.Get("/me", middleware.Auth, handler.MeHandler)
 
 	// CV
-	cv := r.Group("cv")
+	cv := r.Group("/cv")
 	cv.Post("/", handler.CreateCVHandler)
+	cv.Post("/upload", handler.UploadCV)
 
 	// User
 	user := r.Group("/user", middleware.Auth)
